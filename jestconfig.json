@@ -1,0 +1,9 @@
+{
+  "preset": "ts-jest",
+  "moduleFileExtensions": ["ts", "js"],
+  "testRegex": "(/__tests__/.*|(\\.|/)test)\\.ts$",
+  "moduleDirectories": [
+    "<rootDir>",
+    "node_modules"
+  ]
+}

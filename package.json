@@ -1,5 +1,5 @@
 {
-  "name": "net",
+  "name": "idelic-safety-net",
   "version": "1.0.0",
   "description": "Lightweight networking library for browsers",
   "main": "lib/index.js",

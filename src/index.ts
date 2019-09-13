@@ -56,10 +56,7 @@ export {NetError};
 export default {
   request,
   ['delete']: createRequest('DELETE'),
-  //['get']: createRequest('GET'),
-  ['get']: function get<T>(url: string, options?: RequestOptions): Request<T> {
-    return request('GET', url, options);
-  },
+  ['get']: createRequest('GET'),
   head: createRequest('HEAD'),
   options: createRequest('OPTIONS'),
   patch: createRequest('PATCH'),
@@ -68,10 +65,7 @@ export default {
 };
 
 function createRequest(method: Method) {
-  return function request<T>(
-    url: string,
-    options?: RequestOptions
-  ): Request<T> {
+  return function request<T>(url: string, options?: RequestOptions): Request<T> {
     return request(method, url, options);
   };
 }

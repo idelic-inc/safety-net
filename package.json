@@ -1,6 +1,6 @@
 {
   "name": "idelic-safety-net",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Lightweight networking library for browsers",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

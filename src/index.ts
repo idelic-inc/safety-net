@@ -1,22 +1,35 @@
 import NetError from './error';
 import {CancellablePromise} from './promise';
 
-export type Method = 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT';
+export type Method =
+  | 'DELETE'
+  | 'GET'
+  | 'HEAD'
+  | 'OPTIONS'
+  | 'PATCH'
+  | 'POST'
+  | 'PUT';
 export type QueryParams = string | [string, any][] | Record<string, any>;
 export type RequestHeaders = [string, any][] | Record<string, any>;
-export type ResponseType = 'arraybuffer' | 'blob' | 'document' | 'json' | 'text' | 'stream';
+export type ResponseType =
+  | 'arraybuffer'
+  | 'blob'
+  | 'document'
+  | 'json'
+  | 'text'
+  | 'stream';
 export type Events = {
   complete?<T>(response: Response<T>): void;
   error?(error: Error): void;
   downloadProgress?(event: ProgressEvent): void;
   uploadProgress?(event: ProgressEvent): void;
-}
+};
 export type Transformers = {
   errors?: (error: NetError) => Error;
-}
+};
 export type Promises<T> = {
   complete: Promise<Response<T>>;
-}
+};
 
 export type RequestOptions = {
   query?: QueryParams;
@@ -25,7 +38,7 @@ export type RequestOptions = {
   body?: any;
   on?: Events;
   transformers?: Transformers;
-}
+};
 
 export interface Request<T> {
   request: XMLHttpRequest;
@@ -57,12 +70,18 @@ function createRequest(method: Method) {
   };
 }
 
-function request<T>(method: string, url: string, options: RequestOptions = {}): Request<T> {
+function request<T>(
+  method: string,
+  url: string,
+  options: RequestOptions = {}
+): Request<T> {
   const request = new XMLHttpRequest();
   request.open(method, parseUrl(url, options.query));
 
   const headers = parseHeaders(options.headers);
-  headers.forEach(header => request.setRequestHeader(header.name, header.value));
+  headers.forEach(header =>
+    request.setRequestHeader(header.name, header.value)
+  );
 
   request.withCredentials = true;
   request.responseType = options.responseType || 'json';
@@ -84,10 +103,9 @@ function parseUrl(url: string, query?: QueryParams): string {
   if (query) {
     const queryString = parseQuery(query);
     return url.includes('?')
-      ? (url.endsWith('&')
+      ? url.endsWith('&')
         ? `${url}${queryString}`
         : `${url}&${queryString}`
-      )
       : `${url}?${queryString}`;
   } else {
     return url;
@@ -98,9 +116,7 @@ function parseQuery(query: QueryParams): string {
   if (typeof query == 'string') {
     return query;
   } else if (Array.isArray(query)) {
-    return query
-      .map(pair => parseQueryOption(pair[0], pair[1]))
-      .join('&');
+    return query.map(pair => parseQueryOption(pair[0], pair[1])).join('&');
   } else {
     return Object.keys(query)
       .filter(queryKey => typeof query[queryKey] != 'undefined')
@@ -122,7 +138,7 @@ function parseQueryOption(key: string, value: any): string {
 type ParsedHeader = {
   name: string;
   value: string;
-}
+};
 
 function parseHeaders(headers?: RequestHeaders): ParsedHeader[] {
   if (!headers) {
@@ -141,7 +157,8 @@ function parseHeaders(headers?: RequestHeaders): ParsedHeader[] {
 }
 
 function normalizeHeaderName(name: string): string {
-  return name.split('-')
+  return name
+    .split('-')
     .map(namePart => {
       const lowerName = namePart.toLowerCase();
       return lowerName[0].toUpperCase() + lowerName.slice(1);
@@ -149,7 +166,10 @@ function normalizeHeaderName(name: string): string {
     .join('-');
 }
 
-function addEventListeners<T>(request: XMLHttpRequest, options: RequestOptions): CancellablePromise<Response<T>> {
+function addEventListeners<T>(
+  request: XMLHttpRequest,
+  options: RequestOptions
+): CancellablePromise<Response<T>> {
   const on: Events = options.on || {};
 
   const cancellable = new CancellablePromise<Response<T>>(
@@ -169,8 +189,10 @@ function addEventListeners<T>(request: XMLHttpRequest, options: RequestOptions):
   );
 
   cancellable._promise.then(on.complete, on.error);
-  on.downloadProgress && request.addEventListener('progress', on.downloadProgress);
-  on.uploadProgress && request.upload.addEventListener('progress', on.uploadProgress);
+  on.downloadProgress &&
+    request.addEventListener('progress', on.downloadProgress);
+  on.uploadProgress &&
+    request.upload.addEventListener('progress', on.uploadProgress);
 
   return cancellable;
 }
@@ -197,7 +219,10 @@ function createResponse<T>(request: XMLHttpRequest): any {
   };
 }
 
-function createError<T>(request: XMLHttpRequest, transformers?: Transformers): Error {
+function createError<T>(
+  request: XMLHttpRequest,
+  transformers?: Transformers
+): Error {
   const netError = new NetError<T>(request, parseResponseBody(request));
   if (transformers && transformers.errors) {
     return transformers.errors(netError);
@@ -221,8 +246,10 @@ function isJsonResponse(request: XMLHttpRequest): boolean {
   // IE 11 does not honour the `responseType` attribute on the request.
   if (request.getResponseHeader) {
     const contentType = request.getResponseHeader('Content-Type') || '';
-    return typeof request.response == 'string' && contentType.includes('application/json');
+    return (
+      typeof request.response == 'string' &&
+      contentType.includes('application/json')
+    );
   }
   return false;
 }
-

@@ -14,8 +14,9 @@ describe('net', () => {
 
   test('should make GET requests', () => {
     const xhr = createXhr();
-    const promise = net.get('/test').on.complete
-      .then(response => expect(response.data).toEqual({a: 1}));
+    const promise = net
+      .get('/test')
+      .on.complete.then(response => expect(response.data).toEqual({a: 1}));
 
     jest.runAllTimers();
 
@@ -35,8 +36,9 @@ describe('net', () => {
       headers: {'content-type': 'application/json'},
       body: {a: 2}
     };
-    const promise = net.post('/test', options).on.complete
-      .then(response => expect(response.data).toEqual({a: 1}));
+    const promise = net
+      .post('/test', options)
+      .on.complete.then(response => expect(response.data).toEqual({a: 1}));
 
     jest.runAllTimers();
 
@@ -46,14 +48,15 @@ describe('net', () => {
     xhr.status = 200;
     xhr.response = {a: 1};
     xhr.trigger('loadend');
-    
+
     return promise;
   });
 
   test('should make DELETE requests', () => {
     const xhr = createXhr();
-    const promise = net.delete('/test/1').on.complete
-      .then(response => expect(response.data).not.toBeDefined());
+    const promise = net
+      .delete('/test/1')
+      .on.complete.then(response => expect(response.data).not.toBeDefined());
 
     jest.runAllTimers();
 
@@ -68,7 +71,8 @@ describe('net', () => {
 
   test('should allow query params', () => {
     const xhr = createXhr();
-    const promise = net.get('/test', {query: [['a', '1'], ['b', '2']]}).on.complete;
+    const promise = net.get('/test', {query: [['a', '1'], ['b', '2']]}).on
+      .complete;
     jest.runAllTimers();
     expect(xhr.open).toBeCalledWith('GET', '/test?a=1&b=2');
     xhr.status = 200;
@@ -78,14 +82,15 @@ describe('net', () => {
 
   test('should throw an error on a response with a 0 status', () => {
     const xhr = createXhr();
-    const p = net.get('/test').on.complete
-      .then(() => {
+    const p = net
+      .get('/test')
+      .on.complete.then(() => {
         throw new Error('GET request should fail');
       })
       .catch(err => expect(err).toBeDefined());
 
     jest.runAllTimers();
-    
+
     xhr.status = 0;
     xhr.trigger('loadend');
 
@@ -94,14 +99,15 @@ describe('net', () => {
 
   test('should throw an error on a response with a 4XX status', () => {
     const xhr = createXhr();
-    const p = net.get('/test').on.complete
-      .then(() => {
+    const p = net
+      .get('/test')
+      .on.complete.then(() => {
         throw Error('GET request should fail');
       })
       .catch(err => expect(err).toBeDefined());
 
     jest.runAllTimers();
-    
+
     xhr.status = 400;
     xhr.trigger('loadend');
 
@@ -110,14 +116,15 @@ describe('net', () => {
 
   test('should throw an error on a response with a 5XX status', () => {
     const xhr = createXhr();
-    const p = net.get('/test').on.complete
-      .then(() => {
+    const p = net
+      .get('/test')
+      .on.complete.then(() => {
         throw Error('GET request should fail');
       })
       .catch(err => expect(err).toBeDefined());
 
     jest.runAllTimers();
-    
+
     xhr.status = 500;
     xhr.trigger('loadend');
 
@@ -126,18 +133,18 @@ describe('net', () => {
 
   test('should throw an error on a response with a 6XX status', () => {
     const xhr = createXhr();
-    const p = net.get('/test').on.complete
-      .then(() => {
+    const p = net
+      .get('/test')
+      .on.complete.then(() => {
         throw Error('GET request should fail');
       })
       .catch(err => expect(err).toBeDefined());
 
     jest.runAllTimers();
-    
+
     xhr.status = 600;
     xhr.trigger('loadend');
 
     return p;
   });
 });
-

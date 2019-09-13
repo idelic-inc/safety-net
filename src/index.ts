@@ -65,7 +65,10 @@ export default {
 };
 
 function createRequest(method: Method) {
-  return function request<T>(url: string, options?: RequestOptions): Request<T> {
+  return function runRequest<T>(
+    url: string,
+    options?: RequestOptions
+  ): Request<T> {
     return request(method, url, options);
   };
 }

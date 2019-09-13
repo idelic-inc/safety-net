@@ -1,12 +1,12 @@
 export default class NetError<T> extends Error {
   request: XMLHttpRequest;
-  response: T;
+  response: T | null;
 
   constructor(request: XMLHttpRequest, response: T) {
     super(NetError.createErrorMessage(request));
+    Object.setPrototypeOf(this, NetError.prototype);
     this.request = request;
     this.response = response;
-    Object.setPrototypeOf(this, NetError.prototype);
   }
 
   static createErrorMessage(request: XMLHttpRequest): string {

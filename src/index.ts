@@ -1,38 +1,35 @@
 import NetError from './error';
 import {CancellablePromise} from './promise';
 
-export type Method =
-  | 'DELETE'
-  | 'GET'
-  | 'HEAD'
-  | 'OPTIONS'
-  | 'PATCH'
-  | 'POST'
-  | 'PUT';
+export type Method = 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT';
 export type QueryParams = string | [string, any][] | Record<string, any>;
 export type RequestHeaders = [string, any][] | Record<string, any>;
-export type ResponseType =
-  | 'arraybuffer'
-  | 'blob'
-  | 'document'
-  | 'json'
-  | 'text'
-  | 'stream';
+export type ResponseType = 'arraybuffer' | 'blob' | 'document' | 'json' | 'text' | 'stream';
+export type Events = {
+  complete?<T>(response: Response<T>): void;
+  error?(error: Error): void;
+  downloadProgress?(event: ProgressEvent): void;
+  uploadProgress?(event: ProgressEvent): void;
+}
 export type Transformers = {
-  errors?<T>(error: NetError<T>): Error;
-};
+  errors?: (error: NetError) => Error;
+}
+export type Promises<T> = {
+  complete: Promise<Response<T>>;
+}
 
 export type RequestOptions = {
   query?: QueryParams;
   headers?: RequestHeaders;
   responseType?: XMLHttpRequestResponseType;
   body?: any;
+  on?: Events;
   transformers?: Transformers;
-};
+}
 
 export interface Request<T> {
   request: XMLHttpRequest;
-  onComplete: Promise<Response<T>>;
+  on: Promises<T>;
   cancel: () => void;
 }
 
@@ -60,40 +57,26 @@ function createRequest(method: Method) {
   };
 }
 
-function request<T>(
-  method: string,
-  url: string,
-  options: RequestOptions = {}
-): Request<T> {
+function request<T>(method: string, url: string, options: RequestOptions = {}): Request<T> {
   const request = new XMLHttpRequest();
   request.open(method, parseUrl(url, options.query));
 
   const headers = parseHeaders(options.headers);
-  headers.forEach(header =>
-    request.setRequestHeader(header.name, header.value)
-  );
+  headers.forEach(header => request.setRequestHeader(header.name, header.value));
 
   request.withCredentials = true;
   request.responseType = options.responseType || 'json';
-  request.send(parseBody(options.body, headers));
 
-  const promise = new CancellablePromise<Response<T>>(
-    (resolve, reject) => {
-      request.addEventListener('loadend', () => {
-        if (request.status >= 200 && request.status < 400) {
-          resolve(createResponse<T>(request));
-        } else {
-          reject(createError<T>(request, options.transformers));
-        }
-      });
-    },
-    () => request.abort()
-  );
+  const cancellable = addEventListeners<T>(request, options);
+
+  request.send(parseBody(options.body, headers));
 
   return {
     request,
-    onComplete: promise._promise,
-    cancel: promise.cancel
+    on: {
+      complete: cancellable._promise
+    },
+    cancel: cancellable.cancel
   };
 }
 
@@ -101,9 +84,10 @@ function parseUrl(url: string, query?: QueryParams): string {
   if (query) {
     const queryString = parseQuery(query);
     return url.includes('?')
-      ? url.endsWith('&')
+      ? (url.endsWith('&')
         ? `${url}${queryString}`
         : `${url}&${queryString}`
+      )
       : `${url}?${queryString}`;
   } else {
     return url;
@@ -114,7 +98,9 @@ function parseQuery(query: QueryParams): string {
   if (typeof query == 'string') {
     return query;
   } else if (Array.isArray(query)) {
-    return query.map(pair => parseQueryOption(pair[0], pair[1])).join('&');
+    return query
+      .map(pair => parseQueryOption(pair[0], pair[1]))
+      .join('&');
   } else {
     return Object.keys(query)
       .filter(queryKey => typeof query[queryKey] != 'undefined')
@@ -136,7 +122,7 @@ function parseQueryOption(key: string, value: any): string {
 type ParsedHeader = {
   name: string;
   value: string;
-};
+}
 
 function parseHeaders(headers?: RequestHeaders): ParsedHeader[] {
   if (!headers) {
@@ -155,13 +141,38 @@ function parseHeaders(headers?: RequestHeaders): ParsedHeader[] {
 }
 
 function normalizeHeaderName(name: string): string {
-  return name
-    .split('-')
+  return name.split('-')
     .map(namePart => {
       const lowerName = namePart.toLowerCase();
       return lowerName[0].toUpperCase() + lowerName.slice(1);
     })
     .join('-');
+}
+
+function addEventListeners<T>(request: XMLHttpRequest, options: RequestOptions): CancellablePromise<Response<T>> {
+  const on: Events = options.on || {};
+
+  const cancellable = new CancellablePromise<Response<T>>(
+    (resolve, reject) => {
+      request.addEventListener('loadend', () => {
+        if (request.status >= 200 && request.status < 400) {
+          resolve(createResponse<T>(request));
+        } else {
+          reject(createError<T>(request, options.transformers));
+        }
+      });
+    },
+    reject => {
+      request.abort();
+      reject(createError<T>(request, options.transformers));
+    }
+  );
+
+  cancellable._promise.then(on.complete, on.error);
+  on.downloadProgress && request.addEventListener('progress', on.downloadProgress);
+  on.uploadProgress && request.upload.addEventListener('progress', on.uploadProgress);
+
+  return cancellable;
 }
 
 function parseBody(body: any, headers: ParsedHeader[]): any | null {
@@ -186,10 +197,7 @@ function createResponse<T>(request: XMLHttpRequest): any {
   };
 }
 
-function createError<T>(
-  request: XMLHttpRequest,
-  transformers?: Transformers
-): Error {
+function createError<T>(request: XMLHttpRequest, transformers?: Transformers): Error {
   const netError = new NetError<T>(request, parseResponseBody(request));
   if (transformers && transformers.errors) {
     return transformers.errors(netError);
@@ -198,8 +206,7 @@ function createError<T>(
 }
 
 function parseResponseBody(request: XMLHttpRequest): any {
-  // IE 11 does not honour the `responseType` attribute on the request.
-  if (typeof request.response == 'string' && request.responseType == 'json') {
+  if (isJsonResponse(request)) {
     try {
       return JSON.parse(request.response);
     } catch (e) {
@@ -209,3 +216,13 @@ function parseResponseBody(request: XMLHttpRequest): any {
     return request.response;
   }
 }
+
+function isJsonResponse(request: XMLHttpRequest): boolean {
+  // IE 11 does not honour the `responseType` attribute on the request.
+  if (request.getResponseHeader) {
+    const contentType = request.getResponseHeader('Content-Type') || '';
+    return typeof request.response == 'string' && contentType.includes('application/json');
+  }
+  return false;
+}
+

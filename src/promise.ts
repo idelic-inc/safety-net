@@ -1,14 +1,14 @@
 type Resolver<T> = (value: T) => void;
 type Rejector = (error: Error) => void;
 type Executor<T> = (resolver: Resolver<T>, rejector: Rejector) => void;
-type Canceller = () => void;
+type Canceller = (rejector: Rejector) => void;
 
 export class CancellablePromise<T> {
   _executor: Executor<T>;
   _canceller: Canceller;
   _promise: Promise<T>;
   _rejector: Rejector = () => {};
-  _completed = false;
+  _completed: boolean = false;
 
   constructor(executor: Executor<T>, canceller: Canceller) {
     this._executor = executor;
@@ -19,28 +19,29 @@ export class CancellablePromise<T> {
   cancel = (): void => {
     if (!this._completed) {
       this._completed = true;
-      this._canceller();
+      this._canceller(this._rejector);
     }
-  };
+  }
 
   _execute = (resolve: Resolver<T>, reject: Rejector): void => {
     this._rejector = reject;
     if (!this._completed) {
       this._executor(this._resolve(resolve), this._reject(reject));
     }
-  };
+  }
 
-  _resolve = (resolver: Resolver<T>) => (value: T) => {
+  _resolve = (resolver: Resolver<T>) => (value: T): void => {
     if (!this._completed) {
       this._completed = true;
       resolver(value);
     }
-  };
+  }
 
-  _reject = (rejector: Rejector) => (error: Error) => {
+  _reject = (rejector: Rejector) => (error: Error): void => {
     if (!this._completed) {
       this._completed = true;
       rejector(error);
     }
-  };
+  }
 }
+

@@ -25,7 +25,7 @@ export type Events = {
   uploadProgress?(event: ProgressEvent): void;
 };
 export type Transformers = {
-  errors?: (error: NetError) => Error;
+  errors?<T>(error: NetError<T>): Error;
 };
 export type Promises<T> = {
   complete: Promise<Response<T>>;

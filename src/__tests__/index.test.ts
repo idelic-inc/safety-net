@@ -1,6 +1,6 @@
 import createXhr from 'test/xhrMock';
 
-import net from 'src/';
+import net from '../';
 
 jest.useFakeTimers();
 

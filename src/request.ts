@@ -1,20 +1,19 @@
-import NetError from './error';
 import {addEventListeners} from './response';
 import {Methods, ParsedHeader, QueryParams, Request, RequestHeaders, RequestOptions} from './types';
 
 export function createRequest(method: Methods) {
-  return function runRequest<T>(
+  return function runRequest<R, T>(
     url: string,
-    options?: RequestOptions<T>
+    options?: RequestOptions<R, T>
   ): Request<T> {
     return request(method, url, options);
   };
 }
 
-export function request<T>(
+export function request<R, T>(
   method: string,
   url: string,
-  options: RequestOptions<T> = {}
+  options: RequestOptions<R, T> = {}
 ): Request<T> {
   const request = new XMLHttpRequest();
   request.open(method, parseUrl(url, options.query));

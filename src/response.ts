@@ -4,7 +4,7 @@ import {Events, RequestOptions, Response, Transformers} from './types';
 
 export function addEventListeners<T>(
   request: XMLHttpRequest,
-  options: RequestOptions<T>
+  options: RequestOptions<any, T>
 ): CancellablePromise<Response<T>> {
   const on: Events = options.on || {};
 
@@ -34,7 +34,7 @@ export function addEventListeners<T>(
 }
 
 
-function createResponse<T>(request: XMLHttpRequest, transformers?: Transformers<T>): Response<T> {
+function createResponse<T>(request: XMLHttpRequest, transformers?: Transformers<any, T>): Response<T> {
   const body = parseResponseBody(request);
   const data = (transformers && transformers.response)
     ? transformers.response(body)
@@ -44,7 +44,7 @@ function createResponse<T>(request: XMLHttpRequest, transformers?: Transformers<
 
 function createError<T>(
   request: XMLHttpRequest,
-  transformers?: Transformers<T>
+  transformers?: Transformers<any, any>
 ): Error {
   const netError = new NetError<T>(request, createResponse(request, transformers).data);
   if (transformers && transformers.error) {

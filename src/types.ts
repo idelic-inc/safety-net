@@ -13,8 +13,8 @@ export type Events = {
   uploadProgress?(event: ProgressEvent): void;
 };
 
-export type Transformers<T> = {
-  request?(body: T | any): any;
+export type Transformers<R, T> = {
+  request?(body: R): any;
   response?(data: any): T;
   error?(error: NetError<T>): Error;
 };
@@ -23,13 +23,13 @@ export type Promises<T> = {
   complete: Promise<Response<T>>;
 };
 
-export type RequestOptions<T> = {
+export type RequestOptions<R, T> = {
   query?: QueryParams;
   headers?: RequestHeaders;
   responseType?: XMLHttpRequestResponseType;
-  body?: any;
+  body?: R;
   on?: Events;
-  transformers?: Transformers<T>;
+  transformers?: Transformers<R, T>;
 };
 
 export interface Request<T> {

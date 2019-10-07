@@ -15,4 +15,3 @@ export default {
   post: createRequest('POST'),
   put: createRequest('PUT')
 };
-

@@ -33,12 +33,15 @@ export function addEventListeners<T>(
   return cancellable;
 }
 
-
-function createResponse<T>(request: XMLHttpRequest, transformers?: Transformers<any, T>): Response<T> {
+function createResponse<T>(
+  request: XMLHttpRequest,
+  transformers?: Transformers<any, T>
+): Response<T> {
   const body = parseResponseBody(request);
-  const data = (transformers && transformers.response)
-    ? transformers.response(body)
-    : (body as T);
+  const data =
+    transformers && transformers.response
+      ? transformers.response(body)
+      : (body as T);
   return {data, request};
 }
 
@@ -46,7 +49,10 @@ function createError<T>(
   request: XMLHttpRequest,
   transformers?: Transformers<any, any>
 ): Error {
-  const netError = new NetError<T>(request, createResponse(request, transformers).data);
+  const netError = new NetError<T>(
+    request,
+    createResponse(request, transformers).data
+  );
   if (transformers && transformers.error) {
     return transformers.error(netError);
   }
@@ -76,4 +82,3 @@ function isJsonResponse(request: XMLHttpRequest): boolean {
   }
   return false;
 }
-

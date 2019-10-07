@@ -1,5 +1,12 @@
 import {addEventListeners} from './response';
-import {Methods, ParsedHeader, QueryParams, Request, RequestHeaders, RequestOptions} from './types';
+import {
+  Methods,
+  ParsedHeader,
+  QueryParams,
+  Request,
+  RequestHeaders,
+  RequestOptions
+} from './types';
 
 export function createRequest(method: Methods) {
   return function runRequest<R, T>(
@@ -28,9 +35,10 @@ export function request<R, T>(
 
   const cancellable = addEventListeners<T>(request, options);
 
-  const body: any = (options.transformers && options.transformers.response)
-    ? options.transformers.response(options.body)
-    : options.body;
+  const body: any =
+    options.transformers && options.transformers.response
+      ? options.transformers.response(options.body)
+      : options.body;
   request.send(parseRequestBody(body, headers));
 
   return {
@@ -118,4 +126,3 @@ function normalizeHeaderName(name: string): string {
     })
     .join('-');
 }
-

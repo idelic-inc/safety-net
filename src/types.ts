@@ -1,6 +1,13 @@
 import NetError from './error';
 
-export type Methods = 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT';
+export type Methods =
+  | 'DELETE'
+  | 'GET'
+  | 'HEAD'
+  | 'OPTIONS'
+  | 'PATCH'
+  | 'POST'
+  | 'PUT';
 
 export type QueryParams = string | [string, any][] | Record<string, any>;
 
@@ -47,4 +54,3 @@ export interface Response<T> {
   data: T;
   request: XMLHttpRequest;
 }
-

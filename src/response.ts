@@ -87,4 +87,3 @@ function defaultErrorHandler(): void {
   // Do nothing. This prevents unnecessary unhandledrejection events since the
   // caller can handle them either here or via the promise API.
 }
-

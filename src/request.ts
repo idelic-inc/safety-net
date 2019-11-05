@@ -46,6 +46,7 @@ export function request<R, T>(
     on: {
       complete: cancellable._promise
     },
+    response: cancellable._promise,
     cancel: cancellable.cancel
   };
 }

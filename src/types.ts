@@ -41,7 +41,9 @@ export type RequestOptions<R, T> = {
 
 export interface Request<T> {
   request: XMLHttpRequest;
+  // Deprecated (2019-11-05)
   on: Promises<T>;
+  response: Promise<Response<T>>;
   cancel: () => void;
 }
 

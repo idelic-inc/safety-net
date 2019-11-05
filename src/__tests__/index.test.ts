@@ -16,7 +16,7 @@ describe('net', () => {
     const xhr = createXhr();
     const promise = net
       .get('/test')
-      .on.complete.then(response => expect(response.data).toEqual({a: 1}));
+      .response.then(response => expect(response.data).toEqual({a: 1}));
 
     jest.runAllTimers();
 
@@ -38,7 +38,7 @@ describe('net', () => {
     };
     const promise = net
       .post('/test', options)
-      .on.complete.then(response => expect(response.data).toEqual({a: 1}));
+      .response.then(response => expect(response.data).toEqual({a: 1}));
 
     jest.runAllTimers();
 
@@ -56,7 +56,7 @@ describe('net', () => {
     const xhr = createXhr();
     const promise = net
       .delete('/test/1')
-      .on.complete.then(response => expect(response.data).not.toBeDefined());
+      .response.then(response => expect(response.data).not.toBeDefined());
 
     jest.runAllTimers();
 
@@ -71,8 +71,8 @@ describe('net', () => {
 
   test('should allow query params', () => {
     const xhr = createXhr();
-    const promise = net.get('/test', {query: [['a', '1'], ['b', '2']]}).on
-      .complete;
+    const promise = net.get('/test', {query: [['a', '1'], ['b', '2']]})
+      .response;
     jest.runAllTimers();
     expect(xhr.open).toBeCalledWith('GET', '/test?a=1&b=2');
     xhr.status = 200;
@@ -84,7 +84,7 @@ describe('net', () => {
     const xhr = createXhr();
     const p = net
       .get('/test')
-      .on.complete.then(() => {
+      .response.then(() => {
         throw new Error('GET request should fail');
       })
       .catch(err => expect(err).toBeDefined());
@@ -101,7 +101,7 @@ describe('net', () => {
     const xhr = createXhr();
     const p = net
       .get('/test')
-      .on.complete.then(() => {
+      .response.then(() => {
         throw Error('GET request should fail');
       })
       .catch(err => expect(err).toBeDefined());
@@ -118,7 +118,7 @@ describe('net', () => {
     const xhr = createXhr();
     const p = net
       .get('/test')
-      .on.complete.then(() => {
+      .response.then(() => {
         throw Error('GET request should fail');
       })
       .catch(err => expect(err).toBeDefined());
@@ -135,7 +135,7 @@ describe('net', () => {
     const xhr = createXhr();
     const p = net
       .get('/test')
-      .on.complete.then(() => {
+      .response.then(() => {
         throw Error('GET request should fail');
       })
       .catch(err => expect(err).toBeDefined());

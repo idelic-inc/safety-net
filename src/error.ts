@@ -10,6 +10,12 @@ export default class NetError<T> extends Error {
   }
 
   static createErrorMessage(request: XMLHttpRequest): string {
+    if (typeof request.response === 'string') {
+      return request.response;
+    }
+    if (typeof request.response.message === 'string') {
+      return request.response.message;
+    }
     switch (Math.floor(request.status / 100)) {
       case 4:
         return 'Error performing request. Please double check your input and try again.';

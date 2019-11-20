@@ -1,6 +1,6 @@
 {
   "name": "idelic-safety-net",
-  "version": "1.0.15",
+  "version": "1.1.0",
   "description": "Lightweight networking library for browsers",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -33,7 +33,7 @@
     "eslint": "^6.3.0",
     "eslint-config-prettier": "^6.3.0",
     "jest": "^24.9.0",
-    "prettier": "1.18.2",
+    "prettier": "^1.19.1",
     "ts-jest": "^24.0.2",
     "typescript": "^3.7.2"
   },

@@ -38,10 +38,7 @@ function createResponse<T>(
   transformer?: (body: any) => T
 ): Response<T> {
   const body = parseResponseBody(request);
-  const data =
-    transformer
-      ? transformer(body)
-      : (body as T);
+  const data = transformer ? transformer(body) : (body as T);
   return {data, request};
 }
 

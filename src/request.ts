@@ -9,7 +9,7 @@ import {
 } from './types';
 
 export function createRequest(method: Methods) {
-  return function runRequest<R, T, E=any>(
+  return function runRequest<R, T, E = any>(
     url: string,
     options?: RequestOptions<R, T, E>
   ): Request<T> {
@@ -17,7 +17,7 @@ export function createRequest(method: Methods) {
   };
 }
 
-export function request<R, T, E=any>(
+export function request<R, T, E = any>(
   method: string,
   url: string,
   options: RequestOptions<R, T, E> = {}

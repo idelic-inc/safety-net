@@ -71,8 +71,12 @@ describe('net', () => {
 
   test('should allow query params', () => {
     const xhr = createXhr();
-    const promise = net.get('/test', {query: [['a', '1'], ['b', '2']]})
-      .response;
+    const promise = net.get('/test', {
+      query: [
+        ['a', '1'],
+        ['b', '2']
+      ]
+    }).response;
     jest.runAllTimers();
     expect(xhr.open).toBeCalledWith('GET', '/test?a=1&b=2');
     xhr.status = 200;

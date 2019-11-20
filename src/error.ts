@@ -1,8 +1,8 @@
-export default class NetError<T> extends Error {
+export default class NetError<E> extends Error {
   request: XMLHttpRequest;
-  response: T | null;
+  response: E | null;
 
-  constructor(request: XMLHttpRequest, response: T) {
+  constructor(request: XMLHttpRequest, response: E) {
     super(NetError.createErrorMessage(request));
     Object.setPrototypeOf(this, NetError.prototype);
     this.request = request;

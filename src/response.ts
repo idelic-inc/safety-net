@@ -2,9 +2,9 @@ import NetError from './error';
 import {CancellablePromise} from './promise';
 import {Events, RequestOptions, Response, Transformers} from './types';
 
-export function addEventListeners<T>(
+export function addEventListeners<T, E>(
   request: XMLHttpRequest,
-  options: RequestOptions<any, T>
+  options: RequestOptions<any, T, E>
 ): CancellablePromise<Response<T>> {
   const on: Events = options.on || {};
 
@@ -12,15 +12,15 @@ export function addEventListeners<T>(
     (resolve, reject) => {
       request.addEventListener('loadend', () => {
         if (request.status >= 200 && request.status < 400) {
-          resolve(createResponse<T>(request, options.transformers));
+          resolve(createResponse<T>(request, options.transformers?.response));
         } else {
-          reject(createError<T>(request, options.transformers));
+          reject(createError<E>(request, options.transformers));
         }
       });
     },
     reject => {
       request.abort();
-      reject(createError<T>(request, options.transformers));
+      reject(createError<E>(request, options.transformers));
     }
   );
 
@@ -35,23 +35,23 @@ export function addEventListeners<T>(
 
 function createResponse<T>(
   request: XMLHttpRequest,
-  transformers?: Transformers<any, T>
+  transformer?: (body: any) => T
 ): Response<T> {
   const body = parseResponseBody(request);
   const data =
-    transformers && transformers.response
-      ? transformers.response(body)
+    transformer
+      ? transformer(body)
       : (body as T);
   return {data, request};
 }
 
-function createError<T>(
+function createError<E>(
   request: XMLHttpRequest,
   transformers?: Transformers<any, any>
 ): Error {
-  const netError = new NetError<T>(
+  const netError = new NetError<E>(
     request,
-    createResponse(request, transformers).data
+    createResponse(request, transformers?.errorResponse).data
   );
   if (transformers && transformers.error) {
     return transformers.error(netError);

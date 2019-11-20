@@ -9,18 +9,18 @@ import {
 } from './types';
 
 export function createRequest(method: Methods) {
-  return function runRequest<R, T>(
+  return function runRequest<R, T, E=any>(
     url: string,
-    options?: RequestOptions<R, T>
+    options?: RequestOptions<R, T, E>
   ): Request<T> {
     return request(method, url, options);
   };
 }
 
-export function request<R, T>(
+export function request<R, T, E=any>(
   method: string,
   url: string,
-  options: RequestOptions<R, T> = {}
+  options: RequestOptions<R, T, E> = {}
 ): Request<T> {
   const request = new XMLHttpRequest();
   request.open(method, parseUrl(url, options.query));
@@ -33,11 +33,11 @@ export function request<R, T>(
   request.withCredentials = true;
   request.responseType = options.responseType || 'json';
 
-  const cancellable = addEventListeners<T>(request, options);
+  const cancellable = addEventListeners<T, E>(request, options);
 
   const body: any =
-    options.transformers && options.transformers.response
-      ? options.transformers.response(options.body)
+    options.transformers && options.transformers.request && options.body
+      ? options.transformers.request(options.body)
       : options.body;
   request.send(parseRequestBody(body, headers));
 

@@ -16,7 +16,7 @@ export default class NetError<E> extends Error {
       case 5:
         return 'Unexpected server error. Please try again.';
       case 0:
-        if (request.readyState == 0) {
+        if (request.readyState == XMLHttpRequest.UNSENT) {
           return 'Request was cancelled.';
         } else {
           return 'There is a connection issue.  Please check your internet connection and try again.';

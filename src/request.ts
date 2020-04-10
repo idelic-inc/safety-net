@@ -33,6 +33,15 @@ export function request<R, T, E = any>(
   request.withCredentials = true;
   request.responseType = options.responseType || 'json';
 
+  request.onreadystatechange = function() {
+    if (this.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
+      const contentType = this.getResponseHeader('Content-Type') || '';
+      if (contentType.includes('application/json')) {
+        this.responseType = 'json';
+      }
+    }
+  };
+
   const cancellable = addEventListeners<T, E>(request, options);
 
   const body: any =

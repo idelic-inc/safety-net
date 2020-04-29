@@ -1,4 +1,5 @@
 import NetError from './error';
+import {CancellablePromise, Rejector, Resolver} from './promise';
 
 export type Methods =
   | 'DELETE'
@@ -56,4 +57,13 @@ export type ParsedHeader = {
 export interface Response<T> {
   data: T;
   request: XMLHttpRequest;
+}
+
+export interface OfflineRequestItem {
+  method: Methods;
+  url: string;
+  options: RequestOptions<any, any, any>;
+  cancellable: CancellablePromise<Response<any>>;
+  resolve: Resolver<any>;
+  reject: Rejector;
 }

@@ -42,7 +42,7 @@ export function request<R, T, E = any>(
     }
   };
 
-  const cancellable = addEventListeners<T, E>(request, options);
+  const cancellable = addEventListeners<T, E>(request, options, method, url);
 
   const body: any =
     options.transformers && options.transformers.request && options.body
@@ -60,7 +60,7 @@ export function request<R, T, E = any>(
   };
 }
 
-function parseUrl(url: string, query?: QueryParams): string {
+export function parseUrl(url: string, query?: QueryParams): string {
   if (query) {
     const queryString = parseQuery(query);
     return url.includes('?')
@@ -73,7 +73,7 @@ function parseUrl(url: string, query?: QueryParams): string {
   }
 }
 
-function parseHeaders(headers?: RequestHeaders): ParsedHeader[] {
+export function parseHeaders(headers?: RequestHeaders): ParsedHeader[] {
   if (!headers) {
     return [];
   } else if (Array.isArray(headers)) {
@@ -89,7 +89,7 @@ function parseHeaders(headers?: RequestHeaders): ParsedHeader[] {
   }
 }
 
-function parseRequestBody(body: any, headers: ParsedHeader[]): any | null {
+export function parseRequestBody(body: any, headers: ParsedHeader[]): any | null {
   if (body) {
     const contentType = headers
       .filter(header => header.name == 'Content-Type')

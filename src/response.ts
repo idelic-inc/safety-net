@@ -1,21 +1,20 @@
 import NetError from './error';
 import {CancellablePromise} from './promise';
+import {addRequestEventListener} from './retry';
 import {Events, RequestOptions, Response, Transformers} from './types';
 
 export function addEventListeners<T, E>(
   request: XMLHttpRequest,
-  options: RequestOptions<any, T, E>
+  options: RequestOptions<any, T, E>,
+  method: string,
+  url: string
 ): CancellablePromise<Response<T>> {
   const on: Events = options.on || {};
 
   const cancellable = new CancellablePromise<Response<T>>(
     (resolve, reject) => {
       request.addEventListener('loadend', () => {
-        if (request.status >= 200 && request.status < 400) {
-          resolve(createResponse<T>(request, options.transformers?.response));
-        } else {
-          reject(createError<E>(request, options.transformers));
-        }
+        addRequestEventListener(request, method, url, options, cancellable, resolve, reject);
       });
     },
     reject => {
@@ -33,7 +32,7 @@ export function addEventListeners<T, E>(
   return cancellable;
 }
 
-function createResponse<T>(
+export function createResponse<T>(
   request: XMLHttpRequest,
   transformer?: (body: any) => T
 ): Response<T> {
@@ -42,7 +41,7 @@ function createResponse<T>(
   return {data, request};
 }
 
-function createError<E>(
+export function createError<E>(
   request: XMLHttpRequest,
   transformers?: Transformers<any, any>
 ): Error {

@@ -1,6 +1,6 @@
 import NetError from './error';
 import {CancellablePromise} from './promise';
-import {addRequestEventListener} from './retry';
+import {handleLoadEnd} from './retry';
 import {Events, RequestOptions, Response, Transformers} from './types';
 
 export function addEventListeners<T, E>(
@@ -14,7 +14,7 @@ export function addEventListeners<T, E>(
   const cancellable = new CancellablePromise<Response<T>>(
     (resolve, reject) => {
       request.addEventListener('loadend', () => {
-        addRequestEventListener(request, method, url, options, cancellable, resolve, reject);
+        handleLoadEnd(request, method, url, options, cancellable, resolve, reject);
       });
     },
     reject => {

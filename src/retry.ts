@@ -1,7 +1,7 @@
 import {CancellablePromise, Rejector, Resolver} from './promise';
-import {parseHeaders, parseRequestBody, parseUrl} from './request';
+import {request} from './request';
 import {createError, createResponse} from './response';
-import {Methods, OfflineRequestItem, Request, RequestOptions, Response} from './types';
+import {Methods, OfflineRequestItem, RequestOptions, Response} from './types';
 
 const offlineRequestQueue: OfflineRequestItem[] = [];
 
@@ -18,44 +18,13 @@ if (detectOnlineStatus()) {
     while (offlineRequestQueue.length > 0) {	
       const item = offlineRequestQueue.shift();	
       if (item) {	
-        requestAgain(item.method, item.url, item.options, item.cancellable, item.resolve, item.reject);	
+        request(item.method, item.url, item.options, item.cancellable, item.resolve, item.reject);	
       }	
     }	
   });	
 }
 
-function requestAgain<T>(	
-  method: string,	
-  url: string,	
-  options: RequestOptions<any, T>,	
-  cancellable: CancellablePromise<Response<T>>,	
-  resolve: Resolver<T>,	
-  reject: Rejector): Request<T> {	
-  const request = new XMLHttpRequest();	
-  request.open(method, parseUrl(url, options.query));	
-
-  const headers = parseHeaders(options.headers);	
-  headers.forEach(header => request.setRequestHeader(header.name, header.value));	
-
-  request.withCredentials = true;	
-  request.responseType = options.responseType || 'json';	
-  request.send(parseRequestBody(options.body, headers));	
-
-  request.addEventListener('loadend', () => {	
-    addRequestEventListener(request, method, url, options, cancellable, resolve, reject);	
-  });
-
-  return {	
-    request,	
-    on: {	
-      complete: cancellable._promise	
-    },
-    response: cancellable._promise,
-    cancel: cancellable.cancel	
- };	
-}
-
-export function addRequestEventListener(	
+export function handleLoadEnd(	
   request: XMLHttpRequest, 	
   method: string,	
   url: string,	

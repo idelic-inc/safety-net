@@ -1,5 +1,5 @@
-type Resolver<T> = (value: T) => void;
-type Rejector = (error: Error) => void;
+export type Resolver<T> = (value: T) => void;
+export type Rejector = (error: Error) => void;
 type Executor<T> = (resolver: Resolver<T>, rejector: Rejector) => void;
 type Canceller = (rejector: Rejector) => void;
 

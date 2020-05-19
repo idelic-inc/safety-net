@@ -32,14 +32,14 @@ export function request<R, T, E = any>(
   request.open(method, parseUrl(url, options.query));
 
   const headers = parseHeaders(options.headers);
-  headers.forEach((header) =>
+  headers.forEach(header =>
     request.setRequestHeader(header.name, header.value)
   );
 
   request.withCredentials = true;
   request.responseType = options.responseType || 'json';
 
-  request.onreadystatechange = function () {
+  request.onreadystatechange = function() {
     if (this.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
       const contentType = this.getResponseHeader('Content-Type') || '';
       if (contentType.includes('application/json')) {
@@ -60,8 +60,16 @@ export function request<R, T, E = any>(
 
   // This is a retry request for offline detection.
   if (resolve && reject) {
-    request.addEventListener('loadend', () => {	
-      handleLoadEnd(request, method, url, options, _cancellable, resolve, reject);	
+    request.addEventListener('loadend', () => {
+      handleLoadEnd(
+        request,
+        method,
+        url,
+        options,
+        _cancellable,
+        resolve,
+        reject
+      );
     });
   }
 
@@ -97,7 +105,7 @@ export function parseHeaders(headers?: RequestHeaders): ParsedHeader[] {
       value: `${value}`
     }));
   } else {
-    return Object.keys(headers).map((name) => ({
+    return Object.keys(headers).map(name => ({
       name: normalizeHeaderName(name),
       value: `${headers[name]}`
     }));
@@ -110,8 +118,8 @@ export function parseRequestBody(
 ): any | null {
   if (body) {
     const contentType = headers
-      .filter((header) => header.name == 'Content-Type')
-      .map((header) => header.value)[0];
+      .filter(header => header.name == 'Content-Type')
+      .map(header => header.value)[0];
     if (contentType == 'application/json' && typeof body != 'string') {
       return JSON.stringify(body);
     } else {
@@ -126,18 +134,18 @@ function parseQuery(query: QueryParams): string {
   if (typeof query == 'string') {
     return query;
   } else if (Array.isArray(query)) {
-    return query.map((pair) => parseQueryOption(pair[0], pair[1])).join('&');
+    return query.map(pair => parseQueryOption(pair[0], pair[1])).join('&');
   } else {
     return Object.keys(query)
-      .filter((queryKey) => typeof query[queryKey] != 'undefined')
-      .map((queryKey) => parseQueryOption(queryKey, query[queryKey]))
+      .filter(queryKey => typeof query[queryKey] != 'undefined')
+      .map(queryKey => parseQueryOption(queryKey, query[queryKey]))
       .join('&');
   }
 }
 
 function parseQueryOption(key: string, value: any): string {
   if (Array.isArray(value)) {
-    return value.map((item) => `${key}=${item}`).join('&');
+    return value.map(item => `${key}=${item}`).join('&');
   } else if (typeof value == 'undefined' || value === null) {
     return key;
   } else {
@@ -148,7 +156,7 @@ function parseQueryOption(key: string, value: any): string {
 function normalizeHeaderName(name: string): string {
   return name
     .split('-')
-    .map((namePart) => {
+    .map(namePart => {
       const lowerName = namePart.toLowerCase();
       return lowerName[0].toUpperCase() + lowerName.slice(1);
     })

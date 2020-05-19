@@ -14,7 +14,15 @@ export function addEventListeners<T, E>(
   const cancellable = new CancellablePromise<Response<T>>(
     (resolve, reject) => {
       request.addEventListener('loadend', () => {
-        handleLoadEnd(request, method, url, options, cancellable, resolve, reject);
+        handleLoadEnd(
+          request,
+          method,
+          url,
+          options,
+          cancellable,
+          resolve,
+          reject
+        );
       });
     },
     reject => {
